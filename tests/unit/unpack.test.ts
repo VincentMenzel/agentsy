@@ -1,19 +1,20 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { unpackCommand } from '../../src/commands/unpack';
 import fs from 'fs-extra';
 import path from 'path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { unpackCommand } from '../../src/commands/unpack';
 
 vi.mock('fs-extra', () => ({
   default: {
-    existsSync: vi.fn(),
-    readJSON: vi.fn(),
-    readdir: vi.fn(),
-    ensureDir: vi.fn(),
-    remove: vi.fn(),
-    ensureSymlink: vi.fn(),
     copy: vi.fn(),
+    ensureDir: vi.fn(),
+    ensureSymlink: vi.fn(),
+    existsSync: vi.fn(),
     pathExists: vi.fn(),
-  }
+    readdir: vi.fn(),
+    readJSON: vi.fn(),
+    remove: vi.fn(),
+  },
 }));
 
 describe('unpackCommand', () => {
@@ -41,7 +42,9 @@ describe('unpackCommand', () => {
   it('should exit if config file not found', async () => {
     fs.existsSync.mockReturnValue(false);
     await expect(unpackCommand()).rejects.toThrow('process.exit called');
-    expect(consoleErrorSpy).toHaveBeenCalledWith('❌ Configuration file agentsy.json not found. Run `agentsy init` first.');
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      '❌ Configuration file agentsy.json not found. Run `agentsy init` first.',
+    );
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -50,7 +53,9 @@ describe('unpackCommand', () => {
     fs.readJSON.mockResolvedValue({ sourceDir: './non-existent-skills' });
 
     await expect(unpackCommand()).rejects.toThrow('process.exit called');
-    expect(consoleErrorSpy).toHaveBeenCalledWith(expect.stringContaining('❌ Source directory not found:'));
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect.stringContaining('❌ Source directory not found:'),
+    );
     expect(processExitSpy).toHaveBeenCalledWith(1);
   });
 
@@ -76,7 +81,7 @@ describe('unpackCommand', () => {
     expect(fs.copy).toHaveBeenCalledWith(
       path.join(MOCK_ROOT_DIR, 'skills', 'skill1.ts'),
       path.join(MOCK_ROOT_DIR, '.gemini', 'skills', 'skill1.ts'),
-      { overwrite: true }
+      { overwrite: true },
     );
     expect(consoleLogSpy).toHaveBeenCalledWith('✅ Synced to .gemini/skills');
   });
@@ -88,14 +93,13 @@ describe('unpackCommand', () => {
     fs.readdir.mockResolvedValue(['skill1.ts']);
     fs.pathExists.mockResolvedValue(true);
 
-
     await unpackCommand();
 
     expect(fs.remove).toHaveBeenCalled();
     expect(fs.ensureSymlink).toHaveBeenCalledWith(
-      path.join(MOCK_ROOT_DIR, 'skills', 'skill1.ts'),
+      '../../skills/skill1.ts',
       path.join(MOCK_ROOT_DIR, '.claude', 'skills', 'skill1.ts'),
-      'file'
+      'file',
     );
     expect(consoleLogSpy).toHaveBeenCalledWith('✅ Synced to .claude/skills');
   });
@@ -124,15 +128,17 @@ describe('unpackCommand', () => {
 
     await unpackCommand();
 
-    expect(fs.remove).toHaveBeenCalledWith(path.join(MOCK_ROOT_DIR, '.gemini', 'skills', 'skill1.ts'));
+    expect(fs.remove).toHaveBeenCalledWith(
+      path.join(MOCK_ROOT_DIR, '.gemini', 'skills', 'skill1.ts'),
+    );
     expect(fs.copy).toHaveBeenCalled();
   });
 
   it('should remove existing symlink before creating a new one', async () => {
     const config = { sourceDir: './skills', syncMode: 'symlink', targetAgents: ['.claude'] };
     fs.existsSync.mockImplementation((p) => {
-        if (p.endsWith('skill1.ts')) return false;
-        return true;
+      if (p.endsWith('skill1.ts')) return false;
+      return true;
     });
     fs.pathExists.mockResolvedValue(true);
     fs.readJSON.mockResolvedValue(config);

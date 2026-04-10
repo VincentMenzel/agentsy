@@ -1,20 +1,20 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { initCommand } from '../../src/commands/init';
 import * as prompts from '@inquirer/prompts';
 import fs from 'fs-extra';
 import path from 'path';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import { initCommand } from '../../src/commands/init';
 
 vi.mock('fs-extra', () => ({
   default: {
-    existsSync: vi.fn(),
-    writeJSON: vi.fn(),
-    readFile: vi.fn(),
     appendFile: vi.fn(),
-  }
+    existsSync: vi.fn(),
+    readFile: vi.fn(),
+    writeJSON: vi.fn(),
+  },
 }));
 
 vi.mock('@inquirer/prompts');
-
 
 describe('initCommand', () => {
   const MOCK_ROOT_DIR = '/fake/dir';
@@ -49,7 +49,7 @@ describe('initCommand', () => {
         syncMode: 'symlink',
         targetAgents: ['.gemini', '.claude'],
       },
-      { spaces: 2 }
+      { spaces: 2 },
     );
     expect(consoleLogSpy).toHaveBeenCalledWith('\n✨ Configuration saved to agentsy.json!');
   });
@@ -75,12 +75,12 @@ describe('initCommand', () => {
 
     expect(fs.appendFile).toHaveBeenCalledWith(
       path.join(MOCK_ROOT_DIR, '.gitignore'),
-      `\n# Agentsy\n.gemini/`
+      `\n# Agentsy\n.gemini/`,
     );
     expect(consoleLogSpy).toHaveBeenCalledWith('✅ Updated .gitignore');
   });
 
-    it('should not update .gitignore if user denies', async () => {
+  it('should not update .gitignore if user denies', async () => {
     vi.mocked(prompts.input).mockResolvedValue('./skills');
     vi.mocked(prompts.select).mockResolvedValue('copy');
     vi.mocked(prompts.checkbox).mockResolvedValue(['.gemini']);
@@ -99,7 +99,7 @@ describe('initCommand', () => {
     vi.mocked(prompts.checkbox).mockResolvedValue(['.gemini']);
     fs.existsSync.mockImplementation((p) => p.toString().endsWith('.gitignore'));
     fs.readFile.mockResolvedValue('.gemini/');
-    
+
     await initCommand();
 
     expect(prompts.confirm).not.toHaveBeenCalled();

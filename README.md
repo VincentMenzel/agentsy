@@ -7,9 +7,10 @@ A lightweight CLI tool to manage and sync AI agent skills across multiple config
 
 ## Why agentsy?
 
-If you use multiple AI agents or IDE extensions (like the Gemini CLI, Claude Dev, or Cursor), you often find yourself maintaining separate "skills" or "instructions" folders for each. 
+If you use multiple AI agents or IDE extensions (like the Gemini CLI, Claude Dev, or Cursor), you often find yourself maintaining separate "skills" or "instructions" folders for each.
 
 **agentsy** allows you to:
+
 - Maintain a **single source of truth** for your skills.
 - Automatically **unpack/sync** them into all your agent directories at once.
 - Choose between **physical copies** or **symlinks** (ideal for development).
@@ -30,11 +31,15 @@ npm install -g agentsy
 ## Quick Start
 
 ### 1. Initialize
+
 Run the setup wizard in the root of your project:
+
 ```bash
 agentsy init
 ```
+
 The wizard will guide you through:
+
 - Locating your skills folder (e.g., `./skills`).
 - Selecting target agent directories (`.gemini`, `.claude`, `.cursor`, etc.).
 - Choosing a sync mode (**Copy** vs **Symlink**).
@@ -43,10 +48,13 @@ The wizard will guide you through:
 This creates an `agentsy.json` configuration file.
 
 ### 2. Unpack/Sync
+
 Whenever you update your skills, run:
+
 ```bash
 agentsy unpack
 ```
+
 This will sync all skills from your source folder to the `skills/` subdirectory of every configured agent.
 
 ## Configuration (`agentsy.json`)
@@ -55,16 +63,14 @@ This will sync all skills from your source folder to the `skills/` subdirectory 
 {
   "sourceDir": "./my-skills",
   "syncMode": "symlink",
-  "targetAgents": [
-    ".gemini",
-    ".claude",
-    ".cursor"
-  ]
+  "targetAgents": [".gemini", ".claude", ".cursor"]
 }
 ```
 
 ## Supported Agents
+
 By default, agentsy detects:
+
 - `.gemini`
 - `.claude`
 - `.cursor`

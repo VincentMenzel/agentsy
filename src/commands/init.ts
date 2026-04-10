@@ -1,6 +1,7 @@
+import { checkbox, confirm, input, select } from '@inquirer/prompts';
 import fs from 'fs-extra';
 import path from 'path';
-import { input, checkbox, confirm, select } from '@inquirer/prompts';
+
 import { DEFAULT_AGENT_FOLDERS } from '../constants.js';
 
 export async function initCommand() {
@@ -8,13 +9,12 @@ export async function initCommand() {
 
   // 1. Source Directory
   const sourceDir = await input({
-    message: 'Where are your skills located?',
     default: './skills',
+    message: 'Where are your skills located?',
   });
 
   // 2. Sync Mode
   const syncMode = await select({
-    message: 'How should skills be synced?',
     choices: [
       {
         name: 'Copy (Physically duplicate files)',
@@ -25,21 +25,22 @@ export async function initCommand() {
         value: 'symlink',
       },
     ],
+    message: 'How should skills be synced?',
   });
 
   // 3. Scan for Agent Folders
   const rootDir = process.cwd();
-  const existingAgents = DEFAULT_AGENT_FOLDERS.filter(folder =>
-    fs.existsSync(path.join(rootDir, folder))
+  const existingAgents = DEFAULT_AGENT_FOLDERS.filter((folder) =>
+    fs.existsSync(path.join(rootDir, folder)),
   );
 
   const targetAgents = await checkbox({
-    message: 'Which agent directories should we unpack into?',
-    choices: DEFAULT_AGENT_FOLDERS.map(folder => ({
+    choices: DEFAULT_AGENT_FOLDERS.map((folder) => ({
+      checked: existingAgents.includes(folder),
       name: folder,
       value: folder,
-      checked: existingAgents.includes(folder),
     })),
+    message: 'Which agent directories should we unpack into?',
   });
 
   if (targetAgents.length === 0) {
@@ -51,19 +52,19 @@ export async function initCommand() {
   const gitignorePath = path.join(rootDir, '.gitignore');
   if (fs.existsSync(gitignorePath)) {
     const gitignoreContent = await fs.readFile(gitignorePath, 'utf8');
-    const missingInGitignore = targetAgents.filter(
-      agent => !gitignoreContent.includes(agent)
-    );
+    const missingInGitignore = targetAgents.filter((agent) => !gitignoreContent.includes(agent));
 
     if (missingInGitignore.length > 0) {
-      console.log(`\n⚠️  The following agent directories are not in your .gitignore: ${missingInGitignore.join(', ')}`);
+      console.log(
+        `\n⚠️  The following agent directories are not in your .gitignore: ${missingInGitignore.join(', ')}`,
+      );
       const shouldUpdate = await confirm({
-        message: 'Should I automatically add them to your .gitignore?',
         default: true,
+        message: 'Should I automatically add them to your .gitignore?',
       });
 
       if (shouldUpdate) {
-        const newLines = missingInGitignore.map(agent => `\n# Agentsy\n${agent}/`).join('\n');
+        const newLines = missingInGitignore.map((agent) => `\n# Agentsy\n${agent}/`).join('\n');
         await fs.appendFile(gitignorePath, newLines);
         console.log('✅ Updated .gitignore');
       }
