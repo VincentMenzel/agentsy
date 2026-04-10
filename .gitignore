@@ -4,3 +4,4 @@ agentsy.json
 .idea
 .vscode
 *.log
+/coverage/*
