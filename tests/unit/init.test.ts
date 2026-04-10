@@ -1,9 +1,9 @@
 import * as prompts from '@inquirer/prompts';
 import fs from 'fs-extra';
 import path from 'path';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
-import { initCommand } from '../../src/commands/init';
+import { initCommand } from '@/commands/init.js';
 
 vi.mock('fs-extra', () => ({
   default: {
@@ -18,8 +18,8 @@ vi.mock('@inquirer/prompts');
 
 describe('initCommand', () => {
   const MOCK_ROOT_DIR = '/fake/dir';
-  let consoleLogSpy;
-  let processExitSpy;
+  let consoleLogSpy: MockInstance;
+  let processExitSpy: MockInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -27,7 +27,7 @@ describe('initCommand', () => {
     consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
-    });
+    }) as unknown as MockInstance;
   });
 
   afterEach(() => {
@@ -38,7 +38,7 @@ describe('initCommand', () => {
     vi.mocked(prompts.input).mockResolvedValue('./my-skills');
     vi.mocked(prompts.select).mockResolvedValue('symlink');
     vi.mocked(prompts.checkbox).mockResolvedValue(['.gemini', '.claude']);
-    fs.existsSync.mockReturnValue(false);
+    vi.mocked(fs.existsSync).mockReturnValue(false);
 
     await initCommand();
 
@@ -67,8 +67,8 @@ describe('initCommand', () => {
     vi.mocked(prompts.input).mockResolvedValue('./skills');
     vi.mocked(prompts.select).mockResolvedValue('copy');
     vi.mocked(prompts.checkbox).mockResolvedValue(['.gemini']);
-    fs.existsSync.mockImplementation((p) => p.toString().endsWith('.gitignore'));
-    fs.readFile.mockResolvedValue('');
+    vi.mocked(fs.existsSync).mockImplementation((p) => p.toString().endsWith('.gitignore'));
+    vi.mocked(fs.readFile).mockResolvedValue('' as any);
     vi.mocked(prompts.confirm).mockResolvedValue(true);
 
     await initCommand();
@@ -84,8 +84,8 @@ describe('initCommand', () => {
     vi.mocked(prompts.input).mockResolvedValue('./skills');
     vi.mocked(prompts.select).mockResolvedValue('copy');
     vi.mocked(prompts.checkbox).mockResolvedValue(['.gemini']);
-    fs.existsSync.mockImplementation((p) => p.toString().endsWith('.gitignore'));
-    fs.readFile.mockResolvedValue('');
+    vi.mocked(fs.existsSync).mockImplementation((p) => p.toString().endsWith('.gitignore'));
+    vi.mocked(fs.readFile).mockResolvedValue('' as any);
     vi.mocked(prompts.confirm).mockResolvedValue(false);
 
     await initCommand();
@@ -97,8 +97,8 @@ describe('initCommand', () => {
     vi.mocked(prompts.input).mockResolvedValue('./skills');
     vi.mocked(prompts.select).mockResolvedValue('copy');
     vi.mocked(prompts.checkbox).mockResolvedValue(['.gemini']);
-    fs.existsSync.mockImplementation((p) => p.toString().endsWith('.gitignore'));
-    fs.readFile.mockResolvedValue('.gemini/');
+    vi.mocked(fs.existsSync).mockImplementation((p) => p.toString().endsWith('.gitignore'));
+    vi.mocked(fs.readFile).mockResolvedValue('.gemini/' as any);
 
     await initCommand();
 

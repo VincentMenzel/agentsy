@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { DEFAULT_AGENT_FOLDERS } from '../../src/constants.js';
+import { DEFAULT_AGENT_FOLDERS } from '@/constants.js';
 
 describe('Constants', () => {
   it('should export DEFAULT_AGENT_FOLDERS', () => {

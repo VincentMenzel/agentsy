@@ -2,7 +2,7 @@ import { checkbox, confirm, input, select } from '@inquirer/prompts';
 import fs from 'fs-extra';
 import path from 'path';
 
-import { DEFAULT_AGENT_FOLDERS } from '../constants.js';
+import { DEFAULT_AGENT_FOLDERS } from '@/constants.js';
 
 export async function initCommand() {
   console.log('\n🚀 Welcome to the agentsy setup wizard!\n');

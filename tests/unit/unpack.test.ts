@@ -1,8 +1,8 @@
 import fs from 'fs-extra';
 import path from 'path';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, type MockInstance, vi } from 'vitest';
 
-import { unpackCommand } from '../../src/commands/unpack';
+import { unpackCommand } from '@/commands/unpack.js';
 
 vi.mock('fs-extra', () => ({
   default: {
@@ -19,10 +19,10 @@ vi.mock('fs-extra', () => ({
 
 describe('unpackCommand', () => {
   const MOCK_ROOT_DIR = '/fake/dir';
-  let consoleLogSpy;
-  let consoleErrorSpy;
-  let consoleWarnSpy;
-  let processExitSpy;
+  let consoleLogSpy: MockInstance;
+  let consoleErrorSpy: MockInstance;
+  let consoleWarnSpy: MockInstance;
+  let processExitSpy: MockInstance;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -32,7 +32,7 @@ describe('unpackCommand', () => {
     consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => {
       throw new Error('process.exit called');
-    });
+    }) as unknown as MockInstance;
   });
 
   afterEach(() => {
@@ -40,7 +40,7 @@ describe('unpackCommand', () => {
   });
 
   it('should exit if config file not found', async () => {
-    fs.existsSync.mockReturnValue(false);
+    vi.mocked(fs.existsSync).mockReturnValue(false);
     await expect(unpackCommand()).rejects.toThrow('process.exit called');
     expect(consoleErrorSpy).toHaveBeenCalledWith(
       '❌ Configuration file agentsy.json not found. Run `agentsy init` first.',
@@ -49,8 +49,9 @@ describe('unpackCommand', () => {
   });
 
   it('should exit if source directory not found', async () => {
-    fs.existsSync.mockImplementation((p) => p.toString().endsWith('agentsy.json'));
-    fs.readJSON.mockResolvedValue({ sourceDir: './non-existent-skills' });
+    vi.mocked(fs.existsSync).mockImplementation(((p: string) =>
+      p.endsWith('agentsy.json')) as any);
+    vi.mocked(fs.readJSON).mockResolvedValue({ sourceDir: './non-existent-skills' });
 
     await expect(unpackCommand()).rejects.toThrow('process.exit called');
     expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -60,9 +61,9 @@ describe('unpackCommand', () => {
   });
 
   it('should warn if no skills are found', async () => {
-    fs.existsSync.mockReturnValue(true);
-    fs.readJSON.mockResolvedValue({ sourceDir: './skills', targetAgents: ['.gemini'] });
-    fs.readdir.mockResolvedValue([]);
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readJSON).mockResolvedValue({ sourceDir: './skills', targetAgents: ['.gemini'] });
+    vi.mocked(fs.readdir).mockResolvedValue([] as any);
 
     await unpackCommand();
     expect(consoleWarnSpy).toHaveBeenCalledWith('⚠️  No skills found in source directory.');
@@ -70,9 +71,9 @@ describe('unpackCommand', () => {
 
   it('should copy skills to target agents', async () => {
     const config = { sourceDir: './skills', syncMode: 'copy', targetAgents: ['.gemini'] };
-    fs.existsSync.mockReturnValue(true);
-    fs.readJSON.mockResolvedValue(config);
-    fs.readdir.mockResolvedValue(['skill1.ts', 'skill2.ts']);
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readJSON).mockResolvedValue(config);
+    vi.mocked(fs.readdir).mockResolvedValue(['skill1.ts', 'skill2.ts'] as any);
 
     await unpackCommand();
 
@@ -88,10 +89,10 @@ describe('unpackCommand', () => {
 
   it('should symlink skills to target agents', async () => {
     const config = { sourceDir: './skills', syncMode: 'symlink', targetAgents: ['.claude'] };
-    fs.existsSync.mockReturnValue(true);
-    fs.readJSON.mockResolvedValue(config);
-    fs.readdir.mockResolvedValue(['skill1.ts']);
-    fs.pathExists.mockResolvedValue(true);
+    vi.mocked(fs.existsSync).mockReturnValue(true);
+    vi.mocked(fs.readJSON).mockResolvedValue(config);
+    vi.mocked(fs.readdir).mockResolvedValue(['skill1.ts'] as any);
+    vi.mocked(fs.pathExists).mockResolvedValue(true as never);
 
     await unpackCommand();
 
@@ -106,13 +107,13 @@ describe('unpackCommand', () => {
 
   it('should create agent and skills directories if they do not exist', async () => {
     const config = { sourceDir: './skills', syncMode: 'copy', targetAgents: ['.new-agent'] };
-    fs.existsSync.mockImplementation((p) => {
-      if (p.toString().endsWith('agentsy.json')) return true;
-      if (p.toString().endsWith('skills')) return true;
+    vi.mocked(fs.existsSync).mockImplementation(((p: string) => {
+      if (p.endsWith('agentsy.json')) return true;
+      if (p.endsWith('skills')) return true;
       return false;
-    });
-    fs.readJSON.mockResolvedValue(config);
-    fs.readdir.mockResolvedValue(['skill1.ts']);
+    }) as any);
+    vi.mocked(fs.readJSON).mockResolvedValue(config);
+    vi.mocked(fs.readdir).mockResolvedValue(['skill1.ts'] as any);
 
     await unpackCommand();
 
@@ -122,9 +123,9 @@ describe('unpackCommand', () => {
 
   it('should remove existing file before copying', async () => {
     const config = { sourceDir: './skills', syncMode: 'copy', targetAgents: ['.gemini'] };
-    fs.existsSync.mockReturnValue(true); // Simulate all files exist
-    fs.readJSON.mockResolvedValue(config);
-    fs.readdir.mockResolvedValue(['skill1.ts']);
+    vi.mocked(fs.existsSync).mockReturnValue(true); // Simulate all files exist
+    vi.mocked(fs.readJSON).mockResolvedValue(config);
+    vi.mocked(fs.readdir).mockResolvedValue(['skill1.ts'] as any);
 
     await unpackCommand();
 
@@ -136,13 +137,13 @@ describe('unpackCommand', () => {
 
   it('should remove existing symlink before creating a new one', async () => {
     const config = { sourceDir: './skills', syncMode: 'symlink', targetAgents: ['.claude'] };
-    fs.existsSync.mockImplementation((p) => {
+    vi.mocked(fs.existsSync).mockImplementation(((p: string) => {
       if (p.endsWith('skill1.ts')) return false;
       return true;
-    });
-    fs.pathExists.mockResolvedValue(true);
-    fs.readJSON.mockResolvedValue(config);
-    fs.readdir.mockResolvedValue(['skill1.ts']);
+    }) as any);
+    vi.mocked(fs.pathExists).mockResolvedValue(true as never);
+    vi.mocked(fs.readJSON).mockResolvedValue(config);
+    vi.mocked(fs.readdir).mockResolvedValue(['skill1.ts'] as any);
 
     await unpackCommand();
 

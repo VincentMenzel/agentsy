@@ -26,6 +26,17 @@ export default defineConfig([
       '@typescript-eslint/consistent-type-definitions': ['error', 'interface'],
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['./*', '../*'],
+              message: 'Please use absolute imports (e.g. @/...) instead of relative imports.',
+            },
+          ],
+        },
+      ],
     },
   },
   {
