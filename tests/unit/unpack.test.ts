@@ -49,8 +49,7 @@ describe('unpackCommand', () => {
   });
 
   it('should exit if source directory not found', async () => {
-    vi.mocked(fs.existsSync).mockImplementation(((p: string) =>
-      p.endsWith('agentsy.json')) as any);
+    vi.mocked(fs.existsSync).mockImplementation(((p: string) => p.endsWith('agentsy.json')) as any);
     vi.mocked(fs.readJSON).mockResolvedValue({ sourceDir: './non-existent-skills' });
 
     await expect(unpackCommand()).rejects.toThrow('process.exit called');
