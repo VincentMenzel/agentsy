@@ -9,7 +9,14 @@ export default defineConfig({
   },
   test: {
     coverage: {
-      exclude: ['dist/**', 'node_modules/**', 'tests/**', 'vitest.config.ts', 'tsup.config.ts'],
+      exclude: [
+        'dist/**',
+        'node_modules/**',
+        'tests/**',
+        'vitest.config.ts',
+        'tsup.config.ts',
+        'src/index.ts',
+      ],
       include: ['src/**/*.ts'],
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

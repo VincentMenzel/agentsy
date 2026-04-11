@@ -55,7 +55,7 @@ export async function unpackCommand() {
       const dest = path.join(agentSkillsPath, skill);
 
       // Clean up existing file/symlink if it exists
-      if (fs.existsSync(dest) || (await fs.pathExists(dest))) {
+      if (await fs.pathExists(dest)) {
         await fs.remove(dest);
       }
 
