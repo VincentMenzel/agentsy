@@ -9,9 +9,8 @@
     "skipLibCheck": true,
     "allowJs": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     }
   },
   "include": ["src/**/*", "tests/**/*", "*.config.ts", "*.config.js"]
